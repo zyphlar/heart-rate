@@ -64,7 +64,7 @@ int[] playerBresults;
 int thisSectionIndex = 0;  // keeping track of which section we're on
 
 
-void setup() { 
+void setup() {  
   /* Heart Rate Stuff */
   size(sketchWidth(), sketchHeight());
   //if (frame != null) {
@@ -105,12 +105,50 @@ void setup() {
     
    
   // GO FIND THE ARDUINO
+  println("Serial Devices Found: {");
   println(Serial.list());    // print a list of available serial ports
   // choose the number between the [] that is connected to the Arduino
-  port = new Serial(this, Serial.list()[0], 115200);  // make sure Arduino is talking serial at this baud rate
-  port.clear();            // flush buffer
-  port.bufferUntil('\n');  // set buffer full flag on receipt of carriage return
-
+  println("}");
+  
+  if(Serial.list().length >= 1) {
+    int serialPort = -1;
+    
+    // macs
+    for(int i=0;i<Serial.list().length;i++){
+      if( Serial.list()[i].indexOf("tty.usb") >= 0 ) {
+        serialPort = i;
+        break;  // key on the first tty.usb
+      }
+    }
+    // linux
+    if(serialPort == -1){
+      for(int i=0;i<Serial.list().length;i++){
+        if( Serial.list()[i].indexOf("tty") >= 0 ) {
+          serialPort = i;
+          break;  // key on the first tty
+        }
+      }
+    }
+    
+    
+    if(serialPort > -1) {
+      port = new Serial(this, Serial.list()[serialPort], 115200);  // make sure Arduino is talking serial at this baud rate
+      port.clear();            // flush buffer
+      port.bufferUntil('\n');  // set buffer full flag on receipt of carriage return
+      
+      println("Using serial port #"+serialPort);
+    }
+    else {
+      println("FAILED to find serial port with 'tty' in the name.");
+      println("IS THE ARDUINO PLUGGED IN?");
+      exit(); 
+    }
+  }
+  else {
+    println("FAILED to find serial port: "+Serial.list().length+" ports available.");
+    println("IS THE ARDUINO PLUGGED IN?");
+    exit(); 
+  }
 
   /* video stuff */
   theMov = new Movie(this, "loop.mov");
@@ -513,6 +551,12 @@ public int sketchHeight() {
   else {
     return screenHeight;
   }
+}
+
+// close serial port before exit
+void exit() {
+  port.stop();
+  super.exit();
 }
 
 //  THESE VARIABLES DETERMINE THE SIZE OF THE DATA WINDOWS
