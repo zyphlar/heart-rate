@@ -44,8 +44,7 @@ Tidied up inefficiencies since the last version.
 //  VARIABLES
 
 // button:
-const int buttonPin = 10;     // the number of the pushbutton pin
-const int buttonPwrPin = 12;     // pin to keep HIGH for power
+const int buttonPin = 12;     // the number of the pushbutton pin
 
 // heart rate:
 int blinkPin = 13;                // pin to blink led at each beat
@@ -89,8 +88,6 @@ void setup(){
   /* BUTTON STUFF */
   // initialize the pushbutton pin as an input:
   pinMode(buttonPin, INPUT);
-  pinMode(buttonPwrPin, OUTPUT);  
-  digitalWrite(buttonPwrPin, HIGH);  
   
   /* HEART RATE SENSOR STUFF */
   pinMode(blinkPin,OUTPUT);         // pin that will blink to your heartbeat!
@@ -129,7 +126,7 @@ void loop(){
     buttonState = reading;
   }
   
-  if(buttonState == 1){
+  if(buttonState == LOW){
     sendDataToProcessing('U',1); 
   }
 
